@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shya/presentation/costumer%20details.dart';
 import 'package:shya/presentation/sidebarscreen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int totalDebit = 0;
   int balance = 0;
   bool showCompanyMenu = false;
+  String searchQuery = "";
 
   @override
   void initState() {
@@ -184,9 +186,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final filteredAccounts = searchQuery.isEmpty
+        ? accounts
+        : accounts.where((acc) {
+      final name = (acc['name'] ?? '').toString().toLowerCase();
+      return name.contains(searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
-      // Remove floatingActionButton
-      //floatingActionButton: ...,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF205781),
@@ -337,18 +344,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     filled: true,
                     fillColor: const Color(0xFFF5F5F5),
                   ),
+                  onChanged: (value) {
+                    setState(() {
+                      searchQuery = value;
+                    });
+                  },
                 ),
               ),
               Expanded(
                 child: isLoadingAccounts
                     ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
-                  itemCount: accounts.length,
+                  itemCount: filteredAccounts.length,
                   itemBuilder: (context, index) {
-                    final acc = accounts[index];
-                    return CustomerTile(
-                      name: acc['name'] ?? "",
-                      amount: "₹${(acc['total_Balance'] ?? 0).toStringAsFixed(2)}",
+                    final acc = filteredAccounts[index];
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => customer_details(
+                              customerId: acc['customerId'],
+                              customerName: acc['name'] ?? "",
+                            ),
+                          ),
+                        );
+                      },
+                      child: CustomerTile(
+                        name: acc['name'] ?? "",
+                        amount: "₹${(acc['total_Balance'] ?? 0).toStringAsFixed(2)}",
+                      ),
                     );
                   },
                 ),

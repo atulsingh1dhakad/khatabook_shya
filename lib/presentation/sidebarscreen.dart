@@ -62,6 +62,7 @@ class _settingscreenState extends State<settingscreen> {
               icon: Icons.arrow_back,
               label: "Back",
               onTap: null, // default pop by InkWell
+              isBack: true,
             ),
             SidebarButton(
               icon: Icons.all_inbox,
@@ -138,17 +139,22 @@ class SidebarButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
   final bool isLogout;
+  final bool isBack;
   const SidebarButton({
     Key? key,
     required this.icon,
     required this.label,
     this.onTap,
     this.isLogout = false,
+    this.isBack = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final color = isLogout ? Colors.red : const Color(0xFF205781);
+    final bgColor = isBack
+        ? const Color(0xFFE8F1FA)
+        : (isLogout ? Colors.red.shade50 : Colors.white);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6),
       child: InkWell(
@@ -157,7 +163,7 @@ class SidebarButton extends StatelessWidget {
         child: Container(
           height: 47,
           decoration: BoxDecoration(
-            color: isLogout ? Colors.red.shade50 : Colors.white,
+            color: bgColor,
             border: Border.all(color: color, width: 1.3),
             borderRadius: BorderRadius.circular(9),
           ),
@@ -176,7 +182,9 @@ class SidebarButton extends StatelessWidget {
                   ),
                 ),
               ),
-
+              // Only show the forward arrow if NOT the back button
+              if (!isBack)
+                const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
               const SizedBox(width: 8),
             ],
           ),
